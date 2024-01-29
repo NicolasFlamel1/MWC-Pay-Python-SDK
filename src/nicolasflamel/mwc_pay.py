@@ -23,7 +23,7 @@ class MwcPay:
 		self._privateServer = privateServer
 	
 	# Create payment
-	def createPayment(self, price: str | None, requiredConfirmations: int | None, timeout: int | None, completedCallback : str, receivedCallback: str | None = None, confirmedCallback: str | None = None, expiredCallback: str | None = None) -> dict[str, str, str] | bool | None:
+	def createPayment(self, price: str | None, requiredConfirmations: int | None, timeout: int | None, completedCallback : str, receivedCallback: str | None = None, confirmedCallback: str | None = None, expiredCallback: str | None = None) -> dict[str, str] | bool | None:
 	
 		# Check if parameters are invalid
 		if (isinstance(price, str) is False and price is not None) or (isinstance(requiredConfirmations, int) is False and requiredConfirmations is not None) or (isinstance(timeout, int) is False and timeout is not None) or isinstance(completedCallback, str) is False or (isinstance(receivedCallback, str) is False and receivedCallback is not None) or (isinstance(confirmedCallback, str) is False and confirmedCallback is not None) or (isinstance(expiredCallback, str) is False and expiredCallback is not None):
@@ -104,7 +104,7 @@ class MwcPay:
 			return False
 	
 	# Get payment info
-	def getPaymentInfo(self, paymentId: str) -> dict[str, str | None, int, bool, int, int | None, str, str] | bool | None:
+	def getPaymentInfo(self, paymentId: str) -> dict[str, str | int | bool | None] | bool | None:
 	
 		# Check if parameters are invalid
 		if isinstance(paymentId, str) is False:
