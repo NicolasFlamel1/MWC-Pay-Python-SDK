@@ -48,7 +48,7 @@ publicServerInfo = mwcPay.getPublicServerInfo()
    This method returns the following value:
    * `MwcPay`: An `MwcPay` object.
 
-2. MWC Pay create payment method: `createPayment(price: str | None, requiredConfirmations: int | None, timeout: int | None, completedCallback: str, receivedCallback: str | None = None, confirmedCallback: str | None = None,  expiredCallback: str | None = None): dict[str, str] | bool | None`
+2. MWC Pay create payment method: `createPayment(price: str | None, requiredConfirmations: int | None, timeout: int | None, completedCallback: str, receivedCallback: str | None = None, confirmedCallback: str | None = None,  expiredCallback: str | None = None) -> dict[str, str] | bool | None`
 
    This method is used to create a payment and it accepts the following parameters:
    * `price: str | None`: The expected amount for the payment. If `None` then any amount will fulfill the payment.
@@ -64,7 +64,7 @@ publicServerInfo = mwcPay.getPublicServerInfo()
    * `False`: An error occurred on the private server and/or communicating with the private server failed.
    * `None`: Parameters are invalid.
 
-3. MWC Pay get payment info method: `getPaymentInfo(paymentId: str): dict[str, str | int | bool | None] | bool | None`
+3. MWC Pay get payment info method: `getPaymentInfo(paymentId: str) -> dict[str, str | int | bool | None] | bool | None`
 
    This method is used to get the status of a payment and it accepts the following parameter:
    * `paymentId: str`: The payment's ID.
@@ -74,14 +74,14 @@ publicServerInfo = mwcPay.getPublicServerInfo()
    * `False`: An error occurred on the private server and/or communicating with the private server failed.
    * `None`: Parameters are invalid and/or the payment doesn't exist.
 
-4. MWC Pay get price method: `getPrice(): str | bool | None`
+4. MWC Pay get price method: `getPrice() -> str | bool | None`
 
    This method is used to get the price of MimbleWimble coin and it returns the following values:
    * `string`: The price of MimbleWimble Coin in USDT.
    * `False`: An error occurred on the private server and/or communicating with the private server failed.
    * `None`: Parameters are invalid and/or the price API is disabled on the private server.
 
-5. MWC Pay get public server info method: `getPublicServerInfo(): dict[str, str | None] | bool | None`
+5. MWC Pay get public server info method: `getPublicServerInfo() -> dict[str, str | None] | bool | None`
 
    This method is used to get info about MWC Pay's public server and it returns the following values:
    * `dict[str, str | None]`: This object contains the public server's `url: str` and `onion_service_address: str | None`.
