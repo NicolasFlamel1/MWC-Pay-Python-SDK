@@ -23,10 +23,10 @@ class MwcPay:
 		self._privateServer = privateServer
 	
 	# Create payment
-	def createPayment(self, price: str | None, requiredConfirmations: int | None, timeout: int | None, completedCallback : str, receivedCallback: str | None = None, confirmedCallback: str | None = None, expiredCallback: str | None = None) -> dict[str, str] | bool | None:
+	def createPayment(self, price: str | None, requiredConfirmations: int | None, timeout: int | None, completedCallback : str, receivedCallback: str | None = None, confirmedCallback: str | None = None, expiredCallback: str | None = None, notes: str | None = None, apiKey: str | None = None) -> dict[str, str] | bool | None:
 	
 		# Check if parameters are invalid
-		if (isinstance(price, str) is False and price is not None) or (isinstance(requiredConfirmations, int) is False and requiredConfirmations is not None) or (isinstance(timeout, int) is False and timeout is not None) or isinstance(completedCallback, str) is False or (isinstance(receivedCallback, str) is False and receivedCallback is not None) or (isinstance(confirmedCallback, str) is False and confirmedCallback is not None) or (isinstance(expiredCallback, str) is False and expiredCallback is not None):
+		if (isinstance(price, str) is False and price is not None) or (isinstance(requiredConfirmations, int) is False and requiredConfirmations is not None) or (isinstance(timeout, int) is False and timeout is not None) or isinstance(completedCallback, str) is False or (isinstance(receivedCallback, str) is False and receivedCallback is not None) or (isinstance(confirmedCallback, str) is False and confirmedCallback is not None) or (isinstance(expiredCallback, str) is False and expiredCallback is not None) or (isinstance(notes, str) is False and notes is not None) or (isinstance(apiKey, str) is False and apiKey is not None):
 		
 			# Return None
 			return None
@@ -56,7 +56,13 @@ class MwcPay:
 				"confirmed_callback": confirmedCallback,
 				
 				# Expired callback
-				"expired_callback": expiredCallback
+				"expired_callback": expiredCallback,
+				
+				# Notes
+				"notes": notes,
+				
+				# API key
+				"api_key": apiKey
 				
 			}.items() if value is not None}))) as createPaymentResponse:
 			
@@ -104,10 +110,10 @@ class MwcPay:
 			return False
 	
 	# Get payment info
-	def getPaymentInfo(self, paymentId: str) -> dict[str, str | int | bool | None] | bool | None:
+	def getPaymentInfo(self, paymentId: str, apiKey: str | None = None) -> dict[str, str | int | bool | None] | bool | None:
 	
 		# Check if parameters are invalid
-		if isinstance(paymentId, str) is False:
+		if isinstance(paymentId, str) is False or (isinstance(apiKey, str) is False and apiKey is not None):
 		
 			# Return None
 			return None
@@ -116,18 +122,21 @@ class MwcPay:
 		try:
 		
 			# Send get payment info request to the private server
-			with urllib.request.urlopen("{}/get_payment_info?{}".format(self._privateServer, urllib.parse.urlencode({
+			with urllib.request.urlopen("{}/get_payment_info?{}".format(self._privateServer, urllib.parse.urlencode({key: value for key, value in {
 			
 				# Payment Id
-				"payment_id": paymentId
+				"payment_id": paymentId,
 				
-			}))) as getPaymentInfoResponse:
+				# API key
+				"api_key": apiKey
+				
+			}.items() if value is not None}))) as getPaymentInfoResponse:
 			
 				# Get payment info from get payment info response
 				paymentInfo = json.loads(getPaymentInfoResponse.read())
 				
 				# Check if payment info's URL, price, required confirmations, received, confirmations, time remaining, status, or recipient payment proof address are invalid
-				if isinstance(paymentInfo, dict) is False or "url" not in paymentInfo or isinstance(paymentInfo["url"], str) is False or paymentInfo["url"] == "" or "price" not in paymentInfo or (paymentInfo["price"] is not None and isinstance(paymentInfo["price"], str) is False) or (paymentInfo["price"] is not None and re.match("^(?:0(?:\.\d+)?|[1-9]\d*(?:\.\d+)?)$", paymentInfo["price"]) is None) or "required_confirmations" not in paymentInfo or isinstance(paymentInfo["required_confirmations"], int) is False or paymentInfo["required_confirmations"] <= 0 or "received" not in paymentInfo or isinstance(paymentInfo["received"], bool) is False or "confirmations" not in paymentInfo or isinstance(paymentInfo["confirmations"], int) is False or paymentInfo["confirmations"] < 0 or paymentInfo["confirmations"] > paymentInfo["required_confirmations"] or "time_remaining" not in paymentInfo or (paymentInfo["time_remaining"] is not None and isinstance(paymentInfo["time_remaining"], int) is False) or (paymentInfo["time_remaining"] is not None and paymentInfo["time_remaining"] < 0) or "status" not in paymentInfo or isinstance(paymentInfo["status"], str) is False or "recipient_payment_proof_address" not in paymentInfo or isinstance(paymentInfo["recipient_payment_proof_address"], str) is False or paymentInfo["recipient_payment_proof_address"] == "":
+				if isinstance(paymentInfo, dict) is False or "url" not in paymentInfo or isinstance(paymentInfo["url"], str) is False or paymentInfo["url"] == "" or "price" not in paymentInfo or (paymentInfo["price"] is not None and isinstance(paymentInfo["price"], str) is False) or (paymentInfo["price"] is not None and re.match("^(?:0(?:\\.\\d+)?|[1-9]\\d*(?:\\.\\d+)?)$", paymentInfo["price"]) is None) or "required_confirmations" not in paymentInfo or isinstance(paymentInfo["required_confirmations"], int) is False or paymentInfo["required_confirmations"] <= 0 or "received" not in paymentInfo or isinstance(paymentInfo["received"], bool) is False or "confirmations" not in paymentInfo or isinstance(paymentInfo["confirmations"], int) is False or paymentInfo["confirmations"] < 0 or paymentInfo["confirmations"] > paymentInfo["required_confirmations"] or "time_remaining" not in paymentInfo or (paymentInfo["time_remaining"] is not None and isinstance(paymentInfo["time_remaining"], int) is False) or (paymentInfo["time_remaining"] is not None and paymentInfo["time_remaining"] < 0) or "status" not in paymentInfo or isinstance(paymentInfo["status"], str) is False or "recipient_payment_proof_address" not in paymentInfo or isinstance(paymentInfo["recipient_payment_proof_address"], str) is False or paymentInfo["recipient_payment_proof_address"] == "":
 				
 					# Return false
 					return False
@@ -182,19 +191,30 @@ class MwcPay:
 			return False
 	
 	# Get price
-	def getPrice(self) -> str | bool | None:
+	def getPrice(self, apiKey: str | None = None) -> str | bool | None:
 	
+		# Check if parameters are invalid
+		if isinstance(apiKey, str) is False and apiKey is not None:
+		
+			# Return None
+			return None
+			
 		# Try
 		try:
 		
 			# Send get price request to the private server
-			with urllib.request.urlopen("{}/get_price".format(self._privateServer)) as getPriceResponse:
+			with urllib.request.urlopen("{}/get_price?{}".format(self._privateServer, urllib.parse.urlencode({key: value for key, value in {
+			
+				# API key
+				"api_key": apiKey
+				
+			}.items() if value is not None}))) as getPriceResponse:
 			
 				# Get price from get price response
 				price = json.loads(getPriceResponse.read())
 				
 				# Check if price is invalid
-				if isinstance(price, dict) is False or "price" not in price or isinstance(price["price"], str) is False or re.match("^(?:0(?:\.\d+)?|[1-9]\d*(?:\.\d+)?)$", price["price"]) is None:
+				if isinstance(price, dict) is False or "price" not in price or isinstance(price["price"], str) is False or re.match("^(?:0(?:\\.\\d+)?|[1-9]\\d*(?:\\.\\d+)?)$", price["price"]) is None:
 				
 					# Return false
 					return False
@@ -224,13 +244,24 @@ class MwcPay:
 			return False
 	
 	# Get public server info
-	def getPublicServerInfo(self) -> dict[str, str | None] | bool | None:
+	def getPublicServerInfo(self, apiKey: str | None = None) -> dict[str, str | None] | bool | None:
 	
+		# Check if parameters are invalid
+		if isinstance(apiKey, str) is False and apiKey is not None:
+		
+			# Return None
+			return None
+			
 		# Try
 		try:
 		
 			# Send get public server info request to the private server
-			with urllib.request.urlopen("{}/get_public_server_info".format(self._privateServer)) as getPublicServerInfoResponse:
+			with urllib.request.urlopen("{}/get_public_server_info?{}".format(self._privateServer, urllib.parse.urlencode({key: value for key, value in {
+			
+				# API key
+				"api_key": apiKey
+				
+			}.items() if value is not None}))) as getPublicServerInfoResponse:
 			
 				# Get public server info from get public server info response
 				publicServerInfo = json.loads(getPublicServerInfoResponse.read())
